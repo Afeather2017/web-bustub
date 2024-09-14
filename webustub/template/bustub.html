@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>web-bustub</title>
+  <style type="text/css">
+    body {
+      font-family: "Noto Sans", sans-serif;
+    }
+    * {
+      font-size: 2px;
+      font-family: "Noto Sans Mono", monospace;
+      /* It's wired. Set Noto Sans to body, and then Noto Sans to all. */
+    }
+    pre {
+      vertical-align: top;
+      line-height: 1;
+    }
+    textarea { 
+      resize:vertical;
+    }
+  </style>
+</head>
+<body>
+  <script>
+  </script>
+  <p>This is a simple webshell for bustub.</p>
+  <p>Use \dt to show all existed tables. And try to run select, insert, update, transaction here</p>
+  <p>There is some simple <a href="">examples</a> you can copy from</p>
+  <p>这是一个简单的bustub webshell</p>
+  <p>用 \dt 查看所有的已经有的表，然后还可以试试select, insert, update, 事务</p>
+  <p>我还准备了一些简单的<a href="">例子</a>给您试用</p>
+  <form id="send_message" action="/bustub" method="get">
+    <input type="submit" value="Submit">
+    <textarea id="sql" name="sql" rows="4" cols="240">Input your sql here.</textarea>
+    <!--the way to submit a constant value:<input type="hidden" id="id" name="id" value="0">-->
+  </form>
+    <!--<pre> to show all white space in the test-->
+  {% for line in results %}
+    <pre>{{ line }}</pre>
+  {% endfor %}
+</body>
+</html>
+
