@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from django.http import HttpResponse
 import socket, time, threading
+import os
 
 class SqlExecutor(object):
     def __init__(self, port):
@@ -41,9 +42,22 @@ id_to_socket = {}
 timeout = {}
 lock = threading.Lock()
 
+def Cleanup():
+    deleted = []
+    for tid, tm in timeout.items():
+        if time.time() - tm >= 60 * 6:
+            print(tid, "closed cuz timeout")
+            deleted += [tid]
+    for tid in deleted:
+        del timeout[tid]
+        del id_to_socket[tid]
+    if len(timeout) == 0:
+        os.system("killall bustub-nc-shell")
+
 def Bustub(request):
     global lock
     with lock:
+        Cleanup()
         global global_terminal_id
         terminal_id = DefaultKey(request.GET.get("id"), "None")
         if terminal_id == "None":
@@ -51,14 +65,6 @@ def Bustub(request):
             global_terminal_id += 1
             id_to_socket[terminal_id] = SqlExecutor(23333)
             timeout[terminal_id] = time.time()
-        deleted = []
-        for tid, tm in timeout.items():
-            if time.time() - tm >= 60 * 6:
-                print(tid, "closed cuz timeout")
-                deleted += [tid]
-        for tid in deleted:
-            del timeout[tid]
-            del id_to_socket[tid]
         sql = DefaultKey(request.GET.get("sql"), "")
         sql = sql.strip()
         print("sql:", sql)
@@ -67,19 +73,29 @@ def Bustub(request):
             return render(request, "bustub.html",
                           {"id": terminal_id, "results": ["There is no sql!"]})
 
+
         if sql.startswith("\\"):
             sql = " ".join(sql.split())
         elif not sql.endswith(";"):
             return render(request, "bustub.html",
                          {"id": terminal_id,
                          "results": ["Your sql must be ends with ';'!"]})
+        if '"' in sql:
+            return render(request, "bustub.html",
+                         {"id": terminal_id,
+                         "results": ["You cannot use \" in any sql",
+                                     "use ' instead."]})
+        data = ""
         try:
             executor = id_to_socket[terminal_id]
             timeout[terminal_id] = time.time()
             data = executor.Execute(sql)
+            print("data:", data)
             results = data.split("\n")
         except Exception as e:
-            results = ["transaction aborted"]
-            timeout[tid] = 0
+            results = ["transaction aborted, commited, or never exist"]
+            if terminal_id in timeout:
+                results += [id_to_socket[terminal_id].GetData()]
+                timeout[terminal_id] = 0
         return render(request, "bustub.html", {"id": terminal_id, "results": results})
 

@@ -13,8 +13,9 @@
       font-family: "Noto Sans Mono", monospace;
       /* It's wired. Set Noto Sans to body, and then Noto Sans to all. */
     }
-    pre {
+    pre, p{
       vertical-align: top;
+      margin: 0;
     }
     textarea { 
       resize:vertical;
@@ -24,12 +25,14 @@
 <body>
   <script>
   </script>
-  <p>This is a simple webshell for bustub.</p>
-  <p>Use \dt to show all existed tables. And try to run select, insert, update here</p>
-  <p>There is some simple <a href="https://www.cnblogs.com/Afeather/p/18413729">examples</a> you can copy from</p>
-  <p>这是一个简单的bustub webshell</p>
-  <p>用 \dt 查看所有的已经有的表，然后还可以试试select, insert, update</p>
+  <p>It's a simple bustub webshell, using \dt to show all tables, and try select, insert, update. For example:</p>
+  <p>这是一个简单的bustub webshell，用 \dt 查看所有的已经有的表，然后还可以试试select, insert, update，比如：</p>
+  <p>select * from test_simple_seq_2;</p>
+  <p>select * from __mock_t8 where v4 &gt 4 and v4 &lt 7;</p>
+  <p>select * from __mock_t8 left join test_simple_seq_2 on v4 = col1;</p>
+  <p>And there are simple <a href="https://www.cnblogs.com/Afeather/p/18413729">example</a> for you to try</p>
   <p>我还准备了一些简单的<a href="https://www.cnblogs.com/Afeather/p/18413729">例子</a>给您试用</p>
+  <p>Project url:https://github.com/Afeather2017/154452023fall Webshell url: https://github.com/Afeather2017/web-bustub</p>
   <form id="send_message" action="/bustub" method="get">
     <input type="submit" value="Submit">
     <textarea id="sql" name="sql" rows="4" cols="240">Input your sql here.</textarea>
