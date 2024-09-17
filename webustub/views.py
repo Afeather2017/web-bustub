@@ -1,17 +1,19 @@
 from django.shortcuts import render
 from django.http import HttpResponse
-import socket
+import socket, time, threading
 
 class SqlExecutor(object):
-    def __init__(self):
+    def __init__(self, port):
         self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.client_socket.connect(("localhost", 23333))
+        self.client_socket.connect(("localhost", port))
         self.__ReadResult()
 
     def __ReadResult(self):
         self.data = ""
         while True:
             data = self.client_socket.recv(512)
+            if len(data) == 0:
+                self.client_socket.close()
             data = data.decode()
             self.data += data
             if self.data.endswith("bustub> "):
@@ -26,26 +28,58 @@ class SqlExecutor(object):
         self.__ReadResult()
         return self.data
 
-executor = SqlExecutor()
+    def __del__(self):
+        self.client_socket.close()
 
 def DefaultKey(value, key):
     if value == "" or value == None:
         return key
     return value
 
-def Bustub(request):
-    sql = DefaultKey(request.GET.get("sql"), "")
-    print("try execute sql", sql)
-    sql = sql.strip()
-    if len(sql) == 0:
-        return render(request, "bustub.html", {"results": ["There is no sql!"]})
+global_terminal_id = 0;
+id_to_socket = {}
+timeout = {}
+lock = threading.Lock()
 
-    if sql.startswith("\\"):
-        sql = " ".join(sql.split())
-    elif not sql.endswith(";"):
-        return render(request, "bustub.html",
-                      {"results": ["Your sql must be ends with ';'!"]})
-    data = executor.Execute(sql)
-    print(data)
-    results = data.split("\n")
-    return render(request, "bustub.html", {"results": results})
+def Bustub(request):
+    global lock
+    with lock:
+        global global_terminal_id
+        terminal_id = DefaultKey(request.GET.get("id"), "None")
+        if terminal_id == "None":
+            terminal_id = 'tid_' + str(global_terminal_id)
+            global_terminal_id += 1
+            id_to_socket[terminal_id] = SqlExecutor(23333)
+            timeout[terminal_id] = time.time()
+        deleted = []
+        for tid, tm in timeout.items():
+            if time.time() - tm >= 60 * 6:
+                print(tid, "closed cuz timeout")
+                deleted += [tid]
+        for tid in deleted:
+            del timeout[tid]
+            del id_to_socket[tid]
+        sql = DefaultKey(request.GET.get("sql"), "")
+        sql = sql.strip()
+        print("sql:", sql)
+        print("tid:", terminal_id)
+        if len(sql) == 0:
+            return render(request, "bustub.html",
+                          {"id": terminal_id, "results": ["There is no sql!"]})
+
+        if sql.startswith("\\"):
+            sql = " ".join(sql.split())
+        elif not sql.endswith(";"):
+            return render(request, "bustub.html",
+                         {"id": terminal_id,
+                         "results": ["Your sql must be ends with ';'!"]})
+        try:
+            executor = id_to_socket[terminal_id]
+            timeout[terminal_id] = time.time()
+            data = executor.Execute(sql)
+            results = data.split("\n")
+        except Exception as e:
+            results = ["transaction aborted"]
+            timeout[tid] = 0
+        return render(request, "bustub.html", {"id": terminal_id, "results": results})
+

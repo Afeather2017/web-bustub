@@ -10,13 +10,11 @@
       font-family: "Noto Sans", sans-serif;
     }
     * {
-      font-size: 2px;
       font-family: "Noto Sans Mono", monospace;
       /* It's wired. Set Noto Sans to body, and then Noto Sans to all. */
     }
     pre {
       vertical-align: top;
-      line-height: 1;
     }
     textarea { 
       resize:vertical;
@@ -35,7 +33,7 @@
   <form id="send_message" action="/bustub" method="get">
     <input type="submit" value="Submit">
     <textarea id="sql" name="sql" rows="4" cols="240">Input your sql here.</textarea>
-    <!--the way to submit a constant value:<input type="hidden" id="id" name="id" value="0">-->
+    <input type="hidden" id="id" name="id" value="{{ id }}">
   </form>
     <!--<pre> to show all white space in the test-->
   {% for line in results %}
