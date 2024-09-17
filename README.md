@@ -22,9 +22,21 @@ All you have to do:
 
 3. run bustub-nc-shell
 
+```shell
+# For serializable mode, change port in webustub/views.py to 23334, then call:
+bustub-nc-shell --serializable --port 23334
+```
+
+```shell
+# For snapshot mode, change port in webustub/views.py to 23333, then call:
+bustub-nc-shell --port 23333
+```
+
 WARN: Multi-user in the same time is not support yet. To achieve this, you'd better using nc directly.
 
-WARN: Long SQL will block this webshell.
+WARN: Time spending SQL will block this webshell.
+
+BUG: A pretty long SQL may cause wrong format, cuz the TCP feature.
 
 # 一个简单的bustub web shell
 
@@ -48,6 +60,18 @@ store.hooksCleanup[index]?.();
 
 3. 执行bustub-nc-shell
 
+```shell
+# 使用串行化模式，设置webustub/views.py中的port为23334，然后执行：
+bustub-nc-shell --serializable --port 23334
+```
+
+```shell
+# 使用串行化模式，设置webustub/views.py中的port为23333，然后执行：
+bustub-nc-shell --port 23333
+```
+
 警告：暂不支持多用户同时使用。为了能够多用户使用，你需要直接使用nc
 
-WARN: 长sql会阻塞这个shell。
+WARN: 耗时很长sql会阻塞这个shell。
+
+BUG: 由于TCP的特性，字符串长度比较长的SQL可能会导致输出错误
