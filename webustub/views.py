@@ -43,6 +43,8 @@ timeout = {}
 lock = threading.Lock()
 
 def Cleanup():
+    if len(timeout) == 0:
+        return
     deleted = []
     for tid, tm in timeout.items():
         if time.time() - tm >= 60 * 6:
