@@ -55,6 +55,7 @@ def Cleanup():
         del id_to_socket[tid]
     if len(timeout) == 0:
         os.system("killall bustub-nc-shell")
+        time.sleep(2)
 
 def Bustub(request):
     global lock
